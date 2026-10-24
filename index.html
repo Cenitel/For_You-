@@ -1,747 +1,425 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Извини меня, пожалуйста...</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Comfortaa:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Извинение</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #fff0f3;
+      --card-bg: #ffffff;
+      --text-main: #4a3e3d;
+      --pink-soft: #ffccd5;
+      --pink-main: #ff85a1;
+      --pink-dark: #f72585;
+      --pink-glow: rgba(255, 133, 161, 0.4);
+      --font-title: 'Caveat', cursive;
+      --font-body: 'Nunito', sans-serif;
+    }
 
-    <style>
-        body {
-            font-family: 'Comfortaa', cursive, sans-serif;
-            background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 50%, #ffd1dc 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
-            touch-action: manipulation;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
 
-        .font-handwriting {
-            font-family: 'Caveat', cursive;
-        }
+    body {
+      background: radial-gradient(circle at center, #fff5f7 0%, #ffe4e8 100%);
+      font-family: var(--font-body);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+      padding: 20px 10px;
+    }
 
-        /* Анимация парящих сердечек на фоне */
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); opacity: 0; }
-            50% { opacity: 0.6; }
-            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
-        }
+    .background-hearts {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
 
-        .bg-heart {
-            position: absolute;
-            pointer-events: none;
-            animation: float 8s linear infinite;
-        }
+    .floating-heart {
+      position: absolute;
+      color: var(--pink-soft);
+      font-size: 20px;
+      animation: floatUp linear infinite;
+      opacity: 0.6;
+    }
 
-        /* Стили для осколков сердца */
-        .heart-shard {
-            cursor: pointer;
-            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-            filter: drop-shadow(0 4px 6px rgba(225, 112, 85, 0.25));
-        }
+    @keyframes floatUp {
+      0% {
+        transform: translateY(105vh) scale(0.8) rotate(0deg);
+        opacity: 0;
+      }
+      20% {
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-10vh) scale(1.2) rotate(360deg);
+        opacity: 0;
+      }
+    }
 
-        .heart-shard:hover {
-            filter: drop-shadow(0 6px 14px rgba(255, 107, 129, 0.6)) brightness(1.05);
-        }
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+      z-index: 2;
+    }
 
-        /* Класс для уже собранного кусочка */
-        .heart-shard.repaired {
-            transform: translate(0, 0) scale(1) rotate(0deg) !important;
-            filter: drop-shadow(0 2px 8px rgba(255, 75, 110, 0.4));
-        }
+    h1 {
+      font-family: var(--font-title);
+      font-size: 3.2rem;
+      color: var(--pink-dark);
+      text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
+      margin-bottom: 5px;
+    }
 
-        /* Эффект свечения собранного сердца */
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(255, 105, 180, 0.6)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(255, 105, 180, 0.9)); }
-        }
+    .subtitle {
+      font-size: 1.1rem;
+      color: #725d5c;
+      font-weight: 600;
+    }
 
-        .heart-healed {
-            animation: heartbeat 2s ease-in-out infinite;
-        }
+    .main-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      width: 100%;
+      max-width: 900px;
+      z-index: 2;
+    }
 
-        /* Анимация появившейся карточки с текстом */
-        @keyframes cardPop {
-            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
+    .heart-wrapper {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 30px;
+      box-shadow: 0 15px 35px rgba(247, 37, 133, 0.08);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
 
-        .animate-pop {
-            animation: cardPop 0.5s ease-out forwards;
-        }
+    .heart-svg {
+      width: 280px;
+      height: 280px;
+      overflow: visible;
+    }
 
-        /* Нежное мерцание искр */
-        @keyframes sparkle {
-            0%, 100% { opacity: 0; transform: scale(0); }
-            50% { opacity: 1; transform: scale(1.2); }
-        }
+    .shard {
+      cursor: pointer;
+      fill: var(--pink-soft);
+      stroke: #ffffff;
+      stroke-width: 3px;
+      stroke-linejoin: round;
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), fill 0.4s ease, filter 0.4s ease;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.06));
+    }
 
-        .sparkle-icon {
-            animation: sparkle 1.5s ease-in-out infinite;
-        }
+    .shard:hover {
+      fill: #ffb3c1;
+      filter: drop-shadow(0 6px 12px var(--pink-glow));
+    }
 
-        /* Стилизация скроллбара в модальном окне */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #fce7f3;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #f472b6;
-            border-radius: 10px;
-        }
-    </style>
+    .shard.restored {
+      fill: var(--pink-main);
+      transform: translate(0, 0) rotate(0deg) scale(1) !important;
+      stroke: #ffffff;
+    }
+
+    .heart-svg.fully-healed {
+      animation: heartbeat 1.5s infinite alternate ease-in-out;
+    }
+
+    .heart-svg.fully-healed .shard {
+      fill: var(--pink-dark);
+    }
+
+    @keyframes heartbeat {
+      0% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 15px rgba(247, 37, 133, 0.4));
+      }
+      100% {
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 25px rgba(247, 37, 133, 0.7));
+      }
+    }
+
+    .message-card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 30px;
+      width: 100%;
+      max-width: 420px;
+      min-height: 280px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: 2px solid #ffe6ea;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .message-card .step-badge {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--pink-dark);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .message-card h2 {
+      font-family: var(--font-title);
+      font-size: 2.2rem;
+      color: var(--pink-dark);
+      margin-bottom: 10px;
+      line-height: 1.1;
+    }
+
+    .message-card p {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--text-main);
+    }
+
+    .final-screen {
+      display: none;
+      text-align: center;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    .final-screen h2 {
+      font-size: 2.5rem;
+      color: var(--pink-dark);
+      margin-bottom: 15px;
+    }
+
+    .final-screen p {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+    }
+
+    .restart-btn {
+      background: var(--pink-dark);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(247, 37, 133, 0.3);
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .restart-btn:hover {
+      transform: scale(1.05);
+      background: #d61c72;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .progress-bar {
+      margin-top: 20px;
+      width: 100%;
+      height: 8px;
+      background: #ffe6ea;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--pink-main), var(--pink-dark));
+      transition: width 0.4s ease;
+      border-radius: 10px;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 2.6rem; }
+      .heart-wrapper { width: 270px; height: 270px; }
+      .heart-svg { width: 240px; height: 240px; }
+      .message-card { padding: 20px; }
+    }
+  </style>
 </head>
-<body class="flex flex-col items-center justify-between min-h-screen p-4 md:p-8 relative text-pink-900">
+<body>
 
-    <!-- Контейнер для анимированного фона -->
-    <div id="bg-particles" class="fixed inset-0 pointer-events-none z-0"></div>
+  <div class="background-hearts" id="bgHearts"></div>
 
-    <!-- Шапка -->
-    <header class="text-center mt-2 z-10 max-w-xl">
-        <div class="flex items-center justify-center gap-2 mb-3">
-            <span class="px-4 py-1.5 bg-white/70 backdrop-blur-md rounded-full shadow-sm text-xs md:text-sm text-pink-600 font-semibold border border-pink-100">
-                <i class="fa-solid fa-sparkles text-pink-400 mr-1.5"></i> Нажимай на кусочки сердца
-            </span>
-            <button onclick="openEditorModal()" class="px-3 py-1.5 bg-pink-500 hover:bg-pink-600 text-white rounded-full text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5">
-                <i class="fa-solid fa-pen-to-square"></i>
-                <span class="hidden sm:inline">Настроить тексты</span>
-            </button>
-        </div>
-        
-        <h1 class="text-2xl md:text-4xl font-bold text-pink-700 tracking-wide">
-            Мое сердце не на месте...
-        </h1>
-        <p class="text-sm md:text-base text-pink-800/80 mt-2 px-2">
-            Каждый осколок хранит в себе мысли о тебе. Собери моё сердце воедино, чтобы открыть наше фото 💕
-        </p>
-    </header>
+  <header>
+    <h1>Извини меня, пожалуйста...</h1>
+    <div class="subtitle">Моё сердце разбито. Нажимай на осколки, чтобы собрать его 💔</div>
+  </header>
 
-    <!-- Панель загрузки фото и выбора режима -->
-    <section class="w-full max-w-xl bg-white/75 backdrop-blur-md p-3.5 rounded-2xl shadow-md border border-pink-200/80 z-10 my-3 text-xs md:text-sm">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-            
-            <!-- Загрузка изображения -->
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-                <label class="cursor-pointer bg-pink-100 hover:bg-pink-200 text-pink-700 font-semibold px-3 py-2 rounded-xl transition-all flex items-center gap-2 text-xs shadow-sm">
-                    <i class="fa-solid fa-image text-pink-500 text-base"></i>
-                    <span>Загрузить фото</span>
-                    <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
-                </label>
-                
-                <button onclick="promptImageUrl()" class="text-xs text-pink-600 hover:underline flex items-center gap-1">
-                    <i class="fa-solid fa-link"></i> Ссылка
-                </button>
-            </div>
-
-            <!-- Режим показа фото -->
-            <div class="flex items-center gap-1 bg-pink-100/70 p-1 rounded-xl border border-pink-200 w-full sm:w-auto justify-center">
-                <button id="mode-reveal-btn" onclick="setPhotoMode('reveal')" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition-all bg-white text-pink-700 shadow-sm">
-                    <i class="fa-solid fa-eye mr-1"></i>Фото внутри
-                </button>
-                <button id="mode-mosaic-btn" onclick="setPhotoMode('mosaic')" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-pink-600 hover:text-pink-800 transition-all">
-                    <i class="fa-solid fa-puzzle-piece mr-1"></i>Мозаика
-                </button>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Основная секция: Интерактивное Сердце -->
-    <main class="w-full max-w-4xl flex flex-col md:flex-row items-center justify-center gap-8 my-4 z-10">
-
-        <!-- Область Сердца -->
-        <div id="heart-container" class="relative w-72 h-72 md:w-96 md:h-96 flex items-center justify-center shrink-0">
-
-            <!-- Внутреннее Фото (проявляется при сборке) -->
-            <div id="photo-reveal-wrapper" class="absolute w-[80%] h-[80%] z-0 overflow-hidden flex items-center justify-center transition-opacity duration-700 opacity-20" style="clip-path: url(#heart-clip);">
-                <img id="heart-photo" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=600&q=80" 
-                     alt="Наше фото" class="w-full h-full object-cover transition-all duration-700 scale-105">
-            </div>
-
-            <!-- SVG с маской и осколками сердца -->
-            <svg id="heart-svg" viewBox="0 0 200 200" class="w-full h-full relative z-10 overflow-visible">
-                <defs>
-                    <!-- Клип-путь контура сердца для фотографий -->
-                    <clipPath id="heart-clip" clipPathUnits="userSpaceOnUse">
-                        <path d="M100,175 C100,175 20,120 20,65 C20,35 42,15 70,15 C87,15 100,27 100,27 C100,27 113,15 130,15 C158,15 180,35 180,65 C180,120 100,175 100,175 Z" />
-                    </clipPath>
-
-                    <!-- Градиенты по умолчанию -->
-                    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#ff758c;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#ff7eb3;stop-opacity:1" />
-                    </linearGradient>
-                    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#ff4b6e;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#ff758c;stop-opacity:1" />
-                    </linearGradient>
-                    <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#ff85a2;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#fca5a5;stop-opacity:1" />
-                    </linearGradient>
-
-                    <!-- Текстура загруженного фото для мозаики -->
-                    <pattern id="photo-pattern" patternUnits="userSpaceOnUse" width="200" height="200">
-                        <image id="svg-pattern-image" href="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=600&q=80" x="0" y="0" width="200" height="200" preserveAspectRatio="xMidYMid slice" />
-                    </pattern>
-                </defs>
-
-                <!-- Контур-подсказка заднего плана -->
-                <path d="M100,175 C100,175 20,120 20,65 C20,35 42,15 70,15 C87,15 100,27 100,27 C100,27 113,15 130,15 C158,15 180,35 180,65 C180,120 100,175 100,175 Z" 
-                      fill="none" stroke="#f472b6" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.4" />
-
-                <!-- Осколок 1 (Верхний левый) -->
-                <path id="shard-1" class="heart-shard" fill="url(#grad1)" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"
-                    d="M100,27 C87,15 70,15 70,15 C42,15 20,35 20,65 C20,78 25,90 33,101 L75,70 L100,27 Z"
-                    onclick="handleShardClick(1)" />
-
-                <!-- Осколок 2 (Верхний правый) -->
-                <path id="shard-2" class="heart-shard" fill="url(#grad2)" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"
-                    d="M100,27 L125,75 L168,60 C176,62 180,63 180,65 C180,35 158,15 130,15 C113,15 100,27 100,27 Z"
-                    onclick="handleShardClick(2)" />
-
-                <!-- Осколок 3 (Центральный левый) -->
-                <path id="shard-3" class="heart-shard" fill="url(#grad3)" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"
-                    d="M33,101 C48,121 70,143 85,155 L100,105 L75,70 L33,101 Z"
-                    onclick="handleShardClick(3)" />
-
-                <!-- Осколок 4 (Центральный правый) -->
-                <path id="shard-4" class="heart-shard" fill="url(#grad1)" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"
-                    d="M168,60 L125,75 L100,105 L135,145 C158,122 177,93 180,65 L168,60 Z"
-                    onclick="handleShardClick(4)" />
-
-                <!-- Осколок 5 (Нижний кончик) -->
-                <path id="shard-5" class="heart-shard" fill="url(#grad2)" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"
-                    d="M85,155 C100,175 100,175 100,175 C100,175 100,175 115,164 C123,158 130,152 135,145 L100,105 L85,155 Z"
-                    onclick="handleShardClick(5)" />
-            </svg>
-        </div>
-
-        <!-- Карточка с откровениями / сообщениями -->
-        <div class="w-full max-w-md min-h-[230px] flex items-center justify-center">
-            
-            <!-- Инструкция по умолчанию -->
-            <div id="default-message" class="bg-white/85 backdrop-blur-md p-6 rounded-3xl shadow-xl border border-pink-100 text-center w-full">
-                <div class="w-12 h-12 bg-pink-100 text-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
-                    <i class="fa-solid fa-hand-pointer animate-bounce"></i>
-                </div>
-                <h3 class="font-bold text-pink-700 text-lg mb-1">Нажми на любой осколок</h3>
-                <p class="text-sm text-pink-600/80">Каждое прикосновение возвращает кусочек сердца на место и открывает мое послание...</p>
-                <div class="mt-4 flex justify-center gap-1.5" id="progress-dots">
-                    <!-- Точки прогресса -->
-                    <span class="w-2.5 h-2.5 rounded-full bg-pink-200 transition-all duration-300"></span>
-                    <span class="w-2.5 h-2.5 rounded-full bg-pink-200 transition-all duration-300"></span>
-                    <span class="w-2.5 h-2.5 rounded-full bg-pink-200 transition-all duration-300"></span>
-                    <span class="w-2.5 h-2.5 rounded-full bg-pink-200 transition-all duration-300"></span>
-                    <span class="w-2.5 h-2.5 rounded-full bg-pink-200 transition-all duration-300"></span>
-                </div>
-            </div>
-
-            <!-- Контейнер для записки (появляется при клике) -->
-            <div id="note-card" class="hidden bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-xl border border-pink-200 w-full animate-pop relative">
-                <span id="note-number" class="absolute -top-3 -right-2 bg-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-                    Осколок 1/5
-                </span>
-                <div class="flex items-start gap-3 mb-2">
-                    <i id="note-icon" class="fa-solid fa-heart-crack text-pink-500 text-2xl mt-1"></i>
-                    <div>
-                        <h4 id="note-title" class="font-bold text-pink-700 text-lg">Заголовок</h4>
-                        <p id="note-subtitle" class="text-xs text-pink-400 font-semibold">Искренние слова</p>
-                    </div>
-                </div>
-                <p id="note-text" class="text-sm md:text-base text-pink-900 leading-relaxed font-handwriting text-xl mt-3 pl-2 border-l-2 border-pink-300">
-                    Текст извинения...
-                </p>
-            </div>
-
-            <!-- Финальное поздравление (скрыто) -->
-            <div id="final-card" class="hidden bg-gradient-to-br from-white/95 to-pink-50/95 backdrop-blur-md p-6 md:p-8 rounded-3xl shadow-2xl border-2 border-pink-300 text-center w-full animate-pop">
-                <div class="inline-block p-3 bg-pink-100 text-pink-600 rounded-full mb-3">
-                    <i class="fa-solid fa-heart-pulse text-3xl"></i>
-                </div>
-                <h3 class="text-2xl font-bold text-pink-700 mb-2">Моё сердце снова целое!</h3>
-                <p id="final-card-text" class="text-base text-pink-800 font-handwriting text-2xl leading-relaxed mb-4">
-                    "Спасибо, что выслушала меня. Ты — самое дорогое, что у меня есть. Пожалуйста, дай мне шанс сделать тебя счастливее!"
-                </p>
-                <div class="p-3 bg-pink-100/60 rounded-2xl text-xs text-pink-700 mb-4 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-sparkles text-pink-500"></i>
-                    <span>Я очень сильно тебя люблю и ценю!</span>
-                </div>
-                <button onclick="resetHeart()" class="px-5 py-2.5 bg-pink-500 hover:bg-pink-600 text-white rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0">
-                    <i class="fa-solid fa-rotate-left mr-1.5"></i> Посмотреть ещё раз
-                </button>
-            </div>
-
-        </div>
-
-    </main>
-
-    <!-- Подвал / Нижняя панель -->
-    <footer class="w-full max-w-md flex items-center justify-between z-10 pt-4 border-t border-pink-200/50 text-xs text-pink-600">
-        <button onclick="toggleMusic()" id="music-btn" class="flex items-center gap-2 px-3 py-1.5 bg-white/60 hover:bg-white/90 rounded-full transition-all border border-pink-100 shadow-sm">
-            <i class="fa-solid fa-music text-pink-400" id="music-icon"></i>
-            <span id="music-text">Музыка: Выкл</span>
-        </button>
-
-        <button onclick="resetHeart()" class="flex items-center gap-1.5 px-3 py-1.5 bg-white/60 hover:bg-white/90 rounded-full transition-all border border-pink-100 shadow-sm">
-            <i class="fa-solid fa-arrows-rotate text-pink-400"></i>
-            <span>Сбросить</span>
-        </button>
-    </footer>
-
-    <!-- Модальное окно редактора текстов извинений -->
-    <div id="editor-modal" class="fixed inset-0 bg-pink-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl shadow-2xl border border-pink-200 w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-pop">
-            
-            <div class="p-4 border-b border-pink-100 flex items-center justify-between bg-pink-50/50">
-                <h3 class="font-bold text-pink-700 text-lg flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-pink-500"></i> Редактор посланий
-                </h3>
-                <button onclick="closeEditorModal()" class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center hover:bg-pink-200 transition-all">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="p-4 overflow-y-auto space-y-4 flex-1 text-xs md:text-sm" id="editor-inputs-list">
-                <!-- Сюда JS сгенерирует поля для каждого осколка -->
-            </div>
-
-            <div class="p-4 border-t border-pink-100 bg-pink-50/50 flex justify-end gap-2">
-                <button onclick="closeEditorModal()" class="px-4 py-2 rounded-xl text-pink-600 font-semibold hover:bg-pink-100 transition-all">Отмена</button>
-                <button onclick="saveCustomTexts()" class="px-5 py-2 bg-pink-500 hover:bg-pink-600 text-white font-semibold rounded-xl shadow-md transition-all">
-                    Сохранить изменения
-                </button>
-            </div>
-
-        </div>
+  <div class="main-container">
+    <div class="heart-wrapper">
+      <svg class="heart-svg" id="heartSvg" viewBox="0 0 300 300">
+        <!-- 5 осколков сердца -->
+        <path class="shard" id="shard-1" d="M150,270 C150,270 50,190 30,120 C22,92 35,60 55,50 C70,42 95,45 110,65 L130,110 L150,150 L150,270 Z" />
+        <path class="shard" id="shard-2" d="M150,270 L150,150 L170,110 L190,65 C205,45 230,42 245,50 C265,60 278,92 270,120 C250,190 150,270 150,270 Z" />
+        <path class="shard" id="shard-3" d="M110,65 C120,48 135,40 150,40 C165,40 180,48 190,65 L170,110 L150,90 L130,110 Z" />
+        <path class="shard" id="shard-4" d="M55,50 C65,45 80,40 100,45 L110,65 L130,110 L100,130 L50,100 Z" />
+        <path class="shard" id="shard-5" d="M245,50 C235,45 220,40 200,45 L190,65 L170,110 L200,130 L250,100 Z" />
+      </svg>
     </div>
 
-    <!-- Логика приложения -->
-    <script>
-        // Данные записок для каждого осколка
-        let shardData = {
-            1: {
-                title: "Осколок Сожаления",
-                subtitle: "Мне очень жаль...",
-                icon: "fa-solid fa-face-sad-tear",
-                text: "Мне ужасно жаль за то, что случилось. Я поступил(а) глупо и не подумал(а) о твоих чувствах. Прости меня...",
-                initialTransform: { x: -45, y: -35, rotate: -25 }
-            },
-            2: {
-                title: "Осколок Воспоминаний",
-                subtitle: "Я скучаю...",
-                icon: "fa-solid fa-sparkles",
-                text: "Я так скучаю по твоей улыбке и нашему теплому общению. Без тебя всё вокруг кажется блеклым и грустным.",
-                initialTransform: { x: 50, y: -40, rotate: 30 }
-            },
-            3: {
-                title: "Осколок Осознания",
-                subtitle: "Я все понял(а)...",
-                icon: "fa-solid fa-lightbulb",
-                text: "Я понял(а) свою ошибку. Ты очень важна для меня, и я не хочу причинять тебе боль больше никогда.",
-                initialTransform: { x: -55, y: 30, rotate: -35 }
-            },
-            4: {
-                title: "Осколок Надежды",
-                subtitle: "Давай исправим...",
-                icon: "fa-solid fa-sun",
-                text: "Я верю, что мы сможем пройти через это. Я готов(а) сделать всё возможное, чтобы вернуть твое доверие.",
-                initialTransform: { x: 50, y: 35, rotate: 20 }
-            },
-            5: {
-                title: "Осколок Любви",
-                subtitle: "От всего сердца...",
-                icon: "fa-solid fa-heart",
-                text: "Ты заслуживаешь самого лучшего отношения. Моё сердце принадлежит только тебе, целое и искреннее.",
-                initialTransform: { x: 0, y: 55, rotate: 15 }
-            }
-        };
+    <div class="message-card">
+      <div id="defaultMsg">
+        <div class="step-badge">Шаг 1 из 5</div>
+        <h2>Нажми на осколок</h2>
+        <p>Каждый кусочек этого сердца хранит в себе мысли о том, как ты мне дорог(а)... Кликни на любой разбросанный фрагмент.</p>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
 
-        let repairedShards = new Set();
-        const totalShards = 5;
-        let photoMode = 'reveal'; // 'reveal' (фото за осколками) или 'mosaic' (фото на самих осколках)
-        let currentPhotoUrl = "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=600&q=80";
+      <div class="final-screen" id="finalScreen">
+        <h2>Сердце снова целое! ❤️</h2>
+        <p>Спасибо за твою доброту и понимание. Ты самое ценное, что у меня есть, и я обещаю беречь тебя и наши отношения!</p>
+        <button class="restart-btn" onclick="resetHeart()">Собрать снова</button>
+      </div>
+    </div>
+  </div>
 
-        let audioCtx = null;
-        let isMusicPlaying = false;
+  <script>
+    const shardData = {
+      'shard-1': {
+        title: "Я осознаю свою ошибку 💭",
+        text: "Я очень жалею о том, что произошло. Мне не нужно было так поступать или говорить эти слова. Ты мне очень дорог(а).",
+        offset: { x: -35, y: 35, rotate: -15 }
+      },
+      'shard-2': {
+        title: "Ты очень мне важен(на) 🌸",
+        text: "Твоя улыбка и твоё хорошее настроение — это лучшее, что есть в моих днях. Мне больно знать, что я стал(а) причиной твой грусти.",
+        offset: { x: 40, y: 30, rotate: 20 }
+      },
+      'shard-3': {
+        title: "Я хочу всё исправить ✨",
+        text: "Ошибки совершают все, но далеко не всё равно, как с ними поступать. Я готов(а) сделать всё, чтобы вернуть твое доверие.",
+        offset: { x: 0, y: -45, rotate: -10 }
+      },
+      'shard-4': {
+        title: "Ценю каждый момент 🤝",
+        text: "Наше общение и твоё тепло не сравнятся ни с чем. Я помню всё хорошее и хочу создавать еще больше добрых воспоминаний.",
+        offset: { x: -45, y: -25, rotate: -25 }
+      },
+      'shard-5': {
+        title: "Прости меня! ❤️",
+        text: "Пожалуйста, давай оставим эту обиду позади. Я искренне прошу у тебя прощения и очень хочу тебя обнять!",
+        offset: { x: 45, y: -20, rotate: 25 }
+      }
+    };
 
-        // Инициализация при загрузке
-        window.onload = function() {
-            shatterHeart();
-            createBackgroundParticles();
-            applyPhotoMode();
-        };
+    let restoredCount = 0;
+    const totalShards = 5;
 
-        // Разбить сердце (задать начальные позиции)
-        function shatterHeart() {
-            repairedShards.clear();
-            const svg = document.getElementById('heart-svg');
-            svg.classList.remove('heart-healed');
+    function initShards() {
+      restoredCount = 0;
+      document.getElementById('progressFill').style.width = '0%';
+      document.getElementById('heartSvg').classList.remove('fully-healed');
+      
+      document.getElementById('defaultMsg').style.display = 'block';
+      document.getElementById('finalScreen').style.display = 'none';
+      
+      document.getElementById('defaultMsg').querySelector('h2').innerText = "Нажми на осколок";
+      document.getElementById('defaultMsg').querySelector('p').innerText = "Каждый кусочек этого сердца хранит в себе мысли о том, как ты мне дорог(а)... Кликни на любой разбросанный фрагмент.";
+      document.getElementById('defaultMsg').querySelector('.step-badge').innerText = `Собрано 0 из ${totalShards}`;
 
-            // Прозрачность скрытого фото
-            const revealWrapper = document.getElementById('photo-reveal-wrapper');
-            revealWrapper.style.opacity = '0.2';
+      Object.keys(shardData).forEach(id => {
+        const el = document.getElementById(id);
+        const data = shardData[id];
+        el.classList.remove('restored');
+        el.style.transform = `translate(${data.offset.x}px, ${data.offset.y}px) rotate(${data.offset.rotate}deg)`;
+        
+        el.onclick = () => handleShardClick(id);
+      });
+    }
 
-            for (let i = 1; i <= totalShards; i++) {
-                const shard = document.getElementById(`shard-${i}`);
-                const data = shardData[i];
-                shard.classList.remove('repaired');
-                shard.style.transform = `translate(${data.initialTransform.x}px, ${data.initialTransform.y}px) rotate(${data.initialTransform.rotate}deg)`;
-            }
+    function handleShardClick(id) {
+      const el = document.getElementById(id);
+      if (el.classList.contains('restored')) return;
 
-            // Сброс интерфейса
-            document.getElementById('default-message').classList.remove('hidden');
-            document.getElementById('note-card').classList.add('hidden');
-            document.getElementById('final-card').classList.add('hidden');
-            updateProgressDots();
-        }
+      el.classList.add('restored');
+      restoredCount++;
 
-        // Клик по осколку
-        function handleShardClick(id) {
-            playSoftTone(220 + id * 90); // Звуковой отклик
+      const data = shardData[id];
+      const defaultMsg = document.getElementById('defaultMsg');
+      
+      defaultMsg.querySelector('.step-badge').innerText = `Собрано ${restoredCount} из ${totalShards}`;
+      defaultMsg.querySelector('h2').innerText = data.title;
+      defaultMsg.querySelector('p').innerText = data.text;
 
-            const shard = document.getElementById(`shard-${id}`);
-            
-            if (!repairedShards.has(id)) {
-                repairedShards.add(id);
-                shard.classList.add('repaired');
-                createSparklesAroundShard(shard);
-            }
+      const progressPercent = (restoredCount / totalShards) * 100;
+      document.getElementById('progressFill').style.width = `${progressPercent}%`;
 
-            // Постепенно проявляем фоновую фотографию в режиме 'reveal'
-            const revealWrapper = document.getElementById('photo-reveal-wrapper');
-            const progress = repairedShards.size / totalShards;
-            if (photoMode === 'reveal') {
-                revealWrapper.style.opacity = (0.2 + progress * 0.8).toString();
-            }
+      if (restoredCount === totalShards) {
+        setTimeout(showFinalScreen, 600);
+      }
+    }
 
-            // Показываем текст
-            showNoteCard(id);
-            updateProgressDots();
+    function showFinalScreen() {
+      document.getElementById('heartSvg').classList.add('fully-healed');
+      document.getElementById('defaultMsg').style.display = 'none';
+      document.getElementById('finalScreen').style.display = 'block';
 
-            // Если все осколки собраны
-            if (repairedShards.size === totalShards) {
-                setTimeout(completeHeartAssembly, 800);
-            }
-        }
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#ff85a1', '#f72585', '#ffffff']
+      });
+    }
 
-        // Показать карту с запиской
-        function showNoteCard(id) {
-            const data = shardData[id];
-            
-            document.getElementById('default-message').classList.add('hidden');
-            document.getElementById('final-card').classList.add('hidden');
-            
-            const card = document.getElementById('note-card');
-            card.classList.remove('hidden');
-            
-            // Перезапуск анимации появления
-            card.classList.remove('animate-pop');
-            void card.offsetWidth;
-            card.classList.add('animate-pop');
+    function resetHeart() {
+      initShards();
+    }
 
-            document.getElementById('note-title').innerText = data.title;
-            document.getElementById('note-subtitle').innerText = data.subtitle || "Искренние слова";
-            document.getElementById('note-text').innerText = `"${data.text}"`;
-            document.getElementById('note-number').innerText = `Осколок ${repairedShards.size}/${totalShards}`;
-            document.getElementById('note-icon').className = `${data.icon} text-pink-500 text-2xl mt-1`;
-        }
+    function createBgHearts() {
+      const container = document.getElementById('bgHearts');
+      for (let i = 0; i < 15; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'floating-heart';
+        heart.innerHTML = '❤️';
+        heart.style.left = Math.random() * 100 + '%';
+        heart.style.animationDuration = (6 + Math.random() * 6) + 's';
+        heart.style.animationDelay = (Math.random() * 5) + 's';
+        container.appendChild(heart);
+      }
+    }
 
-        // Точки прогресса
-        function updateProgressDots() {
-            const dots = document.querySelectorAll('#progress-dots span');
-            dots.forEach((dot, index) => {
-                if (index < repairedShards.size) {
-                    dot.className = "w-3 h-3 rounded-full bg-pink-500 shadow-sm transition-all duration-300";
-                } else {
-                    dot.className = "w-2.5 h-2.5 rounded-full bg-pink-200 transition-all duration-300";
-                }
-            });
-        }
-
-        // Завершение сборки сердца
-        function completeHeartAssembly() {
-            const svg = document.getElementById('heart-svg');
-            svg.classList.add('heart-healed');
-
-            if (photoMode === 'reveal') {
-                document.getElementById('photo-reveal-wrapper').style.opacity = '1';
-            }
-
-            playHealingChime();
-
-            document.getElementById('note-card').classList.add('hidden');
-            document.getElementById('final-card').classList.remove('hidden');
-
-            burstHearts();
-        }
-
-        // --- Загрузка фото и переключение режимов ---
-
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    updatePhotoUrl(e.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function promptImageUrl() {
-            const url = prompt("Вставьте URL-ссылку на ваше фото:", currentPhotoUrl);
-            if (url && url.trim() !== "") {
-                updatePhotoUrl(url.trim());
-            }
-        }
-
-        function updatePhotoUrl(url) {
-            currentPhotoUrl = url;
-            document.getElementById('heart-photo').src = url;
-            document.getElementById('svg-pattern-image').setAttribute('href', url);
-        }
-
-        function setPhotoMode(mode) {
-            photoMode = mode;
-            const revealBtn = document.getElementById('mode-reveal-btn');
-            const mosaicBtn = document.getElementById('mode-mosaic-btn');
-
-            if (mode === 'reveal') {
-                revealBtn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all bg-white text-pink-700 shadow-sm";
-                mosaicBtn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold text-pink-600 hover:text-pink-800 transition-all";
-            } else {
-                mosaicBtn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all bg-white text-pink-700 shadow-sm";
-                revealBtn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold text-pink-600 hover:text-pink-800 transition-all";
-            }
-
-            applyPhotoMode();
-        }
-
-        function applyPhotoMode() {
-            const revealWrapper = document.getElementById('photo-reveal-wrapper');
-            const gradients = ['url(#grad1)', 'url(#grad2)', 'url(#grad3)', 'url(#grad1)', 'url(#grad2)'];
-
-            if (photoMode === 'reveal') {
-                revealWrapper.classList.remove('hidden');
-                // Назначаем осколкам обычные цветовые градиенты
-                for (let i = 1; i <= totalShards; i++) {
-                    document.getElementById(`shard-${i}`).setAttribute('fill', gradients[i-1]);
-                }
-            } else { // 'mosaic'
-                revealWrapper.classList.add('hidden');
-                // Назначаем всем осколкам фоновую текстуру из картинки
-                for (let i = 1; i <= totalShards; i++) {
-                    document.getElementById(`shard-${i}`).setAttribute('fill', 'url(#photo-pattern)');
-                }
-            }
-        }
-
-        // --- Модальное окно редактора текстов ---
-
-        function openEditorModal() {
-            const container = document.getElementById('editor-inputs-list');
-            container.innerHTML = '';
-
-            for (let i = 1; i <= totalShards; i++) {
-                const item = shardData[i];
-                const block = document.createElement('div');
-                block.className = "p-3 bg-pink-50/70 border border-pink-200 rounded-2xl space-y-2";
-                block.innerHTML = `
-                    <div class="font-bold text-pink-700 flex items-center justify-between">
-                        <span><i class="${item.icon} mr-1.5 text-pink-500"></i> Осколок ${i}</span>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-pink-600 mb-0.5">Заголовок</label>
-                        <input type="text" id="edit-title-${i}" value="${escapeHtml(item.title)}" class="w-full px-3 py-1.5 bg-white border border-pink-200 rounded-xl focus:outline-none focus:border-pink-400">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-pink-600 mb-0.5">Текст послания</label>
-                        <textarea id="edit-text-${i}" rows="2" class="w-full px-3 py-1.5 bg-white border border-pink-200 rounded-xl focus:outline-none focus:border-pink-400">${escapeHtml(item.text)}</textarea>
-                    </div>
-                `;
-                container.appendChild(block);
-            }
-
-            document.getElementById('editor-modal').classList.remove('hidden');
-        }
-
-        function closeEditorModal() {
-            document.getElementById('editor-modal').classList.add('hidden');
-        }
-
-        function saveCustomTexts() {
-            for (let i = 1; i <= totalShards; i++) {
-                const newTitle = document.getElementById(`edit-title-${i}`).value;
-                const newText = document.getElementById(`edit-text-${i}`).value;
-                
-                if (newTitle.trim()) shardData[i].title = newTitle.trim();
-                if (newText.trim()) shardData[i].text = newText.trim();
-            }
-
-            closeEditorModal();
-            playSoftTone(400);
-
-            // Если открыта карточка с запиской, обновим её
-            if (!document.getElementById('note-card').classList.contains('hidden')) {
-                const activeShardId = Array.from(repairedShards).pop() || 1;
-                showNoteCard(activeShardId);
-            }
-        }
-
-        function escapeHtml(text) {
-            return text.replace(/"/g, "&quot;");
-        }
-
-        function resetHeart() {
-            shatterHeart();
-            playSoftTone(300);
-        }
-
-        // --- Декоративные эффекты и Искры ---
-
-        function createBackgroundParticles() {
-            const container = document.getElementById('bg-particles');
-            const icons = ['fa-heart', 'fa-sparkles', 'fa-star', 'fa-cloud'];
-            
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('i');
-                const randomIcon = icons[Math.floor(Math.random() * icons.length)];
-                particle.className = `fa-solid ${randomIcon} bg-heart text-pink-300/40`;
-                
-                particle.style.left = `${Math.random() * 100}vw`;
-                particle.style.bottom = `-10vh`;
-                particle.style.fontSize = `${Math.random() * 18 + 10}px`;
-                particle.style.animationDuration = `${Math.random() * 6 + 6}s`;
-                particle.style.animationDelay = `${Math.random() * 5}s`;
-                
-                container.appendChild(particle);
-            }
-        }
-
-        function createSparklesAroundShard(element) {
-            const rect = element.getBoundingClientRect();
-            for (let i = 0; i < 6; i++) {
-                const sparkle = document.createElement('div');
-                sparkle.className = 'fixed pointer-events-none z-50 text-pink-400 text-sm sparkle-icon';
-                sparkle.innerHTML = '<i class="fa-solid fa-sparkle"></i>';
-                
-                const x = rect.left + rect.width / 2 + (Math.random() - 0.5) * 60;
-                const y = rect.top + rect.height / 2 + (Math.random() - 0.5) * 60;
-                
-                sparkle.style.left = `${x}px`;
-                sparkle.style.top = `${y}px`;
-                
-                document.body.appendChild(sparkle);
-                setTimeout(() => sparkle.remove(), 1500);
-            }
-        }
-
-        function burstHearts() {
-            for (let i = 0; i < 35; i++) {
-                setTimeout(() => {
-                    const heart = document.createElement('div');
-                    heart.className = 'fixed pointer-events-none z-50 text-pink-500 text-lg transition-all duration-1000 ease-out';
-                    heart.innerHTML = '<i class="fa-solid fa-heart"></i>';
-                    
-                    const startX = window.innerWidth / 2;
-                    const startY = window.innerHeight / 2;
-                    
-                    heart.style.left = `${startX}px`;
-                    heart.style.top = `${startY}px`;
-                    
-                    document.body.appendChild(heart);
-
-                    const angle = Math.random() * Math.PI * 2;
-                    const distance = Math.random() * 180 + 70;
-                    const destX = startX + Math.cos(angle) * distance;
-                    const destY = startY + Math.sin(angle) * distance;
-
-                    requestAnimationFrame(() => {
-                        heart.style.transform = `translate(${destX - startX}px, ${destY - startY}px) scale(${Math.random() * 1.5 + 0.5})`;
-                        heart.style.opacity = '0';
-                    });
-
-                    setTimeout(() => heart.remove(), 1000);
-                }, i * 40);
-            }
-        }
-
-        // --- Синтезатор звука ---
-
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-        }
-
-        function playSoftTone(freq) {
-            try {
-                initAudio();
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                
-                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.4);
-            } catch (e) {}
-        }
-
-        function playHealingChime() {
-            const notes = [523.25, 659.25, 783.99, 1046.50];
-            notes.forEach((freq, index) => {
-                setTimeout(() => playSoftTone(freq), index * 120);
-            });
-        }
-
-        function toggleMusic() {
-            initAudio();
-            const btnText = document.getElementById('music-text');
-            const btnIcon = document.getElementById('music-icon');
-
-            if (!isMusicPlaying) {
-                isMusicPlaying = true;
-                btnText.innerText = "Музыка: Вкл";
-                btnIcon.className = "fa-solid fa-volume-high text-pink-500 animate-pulse";
-                playAmbientLoop();
-            } else {
-                isMusicPlaying = false;
-                btnText.innerText = "Музыка: Выкл";
-                btnIcon.className = "fa-solid fa-music text-pink-400";
-            }
-        }
-
-        function playAmbientLoop() {
-            if (!isMusicPlaying) return;
-            const chords = [329.63, 392.00, 440.00, 523.25];
-            const randomNote = chords[Math.floor(Math.random() * chords.length)];
-            
-            playSoftTone(randomNote);
-
-            if (isMusicPlaying) {
-                setTimeout(playAmbientLoop, 1200 + Math.random() * 800);
-            }
-        }
-    </script>
+    window.onload = () => {
+      createBgHearts();
+      initShards();
+    };
+  </script>
 </body>
 </html>
